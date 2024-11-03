@@ -21,6 +21,8 @@ entity programs {
   episode : INT
   episode_title : VARCHAR(100)
   episode_detail : VARCHAR(100)
+  release_date : DATE
+  view : INT
 }
 entity genres {
   +genre_id : INT [PK]

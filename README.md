@@ -70,18 +70,20 @@
 ![ER図](http://www.plantuml.com/plantuml/proxy?cache=no&src=https%3A%2F%2Fraw.githubusercontent.com%2FMegumin32%2Finternet_tv%2Fmain%2Fdiagrams%2Fer.puml)
 
 ### データベース構築
-1. データベースの作成と切り替え
+1. データベースの作成と選択
 ``` sql
 CREATE DATABASE internet_tv;
 USE internet_tv; 
 ```
 2. テーブルの作成
-`queries/create_table.sql`を読み込む．
+
+`create_table.sql`を読み込む（リポジトリの`queries`ディレクトリ内）．
 ``` SQL
 source ファイルのパス/create_table.sql;
 ```
 3. データの挿入
-以下の6つの`queries/〇〇.sql`を読み込む．以下の順番で行ってください（外部キー制約があるため，順番を間違えるとエラーになります）．
+
+以下の6つの`sample_〇〇.sql`を読み込む．以下の順番で行ってください（外部キー制約があるため，順番を間違えるとエラーになります）．
 - sample_channels.sql
 - sample_genres.sql
 - sample_users.sql
@@ -205,6 +207,6 @@ ORDER BY
 
 ### 課題
 現在できていない部分を以下に列挙する．
-- テーブル`program`にカラム`release_date`（公開日）と`view`（視聴数）があるが，具体的なデータをいれることができなかった（公開日はサンプルデータ作成後にカラムを追加したため．視聴数については，テーブル`histories`（視聴履歴）のデータを合計することで求めているため）．
+- programテーブルにrelease_date（公開日）とview（視聴数）というカラムがあるが，具体的なデータをいれることができなかった（公開日はサンプルデータ作成後にカラムを追加したため．視聴数については，テーブルhistories（視聴履歴）内のデータを合計することで求めているため）．
 - サンプルデータでは2つ以上のジャンルに属する番組が存在せず，その取扱についても考えることができていない．
 - 番組ごとの放送時間は様々あるが，放送枠は3時間で固定されている．放送時間によって放送枠を調整することがまだできていない．
