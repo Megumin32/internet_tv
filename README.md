@@ -2,7 +2,7 @@
 ### はじめに
 ### 環境構築
 ### テーブル設計
-![ER図](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/megumin32/internet_tv/main/er.puml)
+![ER図](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/Megumin32/internet_tv/main/er.puml)
 
 ### データベース構築
 1. データベースの作成
