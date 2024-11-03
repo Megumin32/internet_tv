@@ -1,3 +1,4 @@
+@startuml
 entity ユーザ {
   +ユーザid : INT [PK]
   --
@@ -48,3 +49,4 @@ entity 視聴履歴 {
 番組 }o-d-|| ジャンル
 ユーザ||-d-o{ 視聴履歴
 番組枠||-u-o{ 視聴履歴
+@enduml
