@@ -1,52 +1,51 @@
 @startuml
-entity ユーザ {
-  +ユーザid : INT [PK]
+entity users {
+  +user_id : INT [PK]
   --
-  名前 : VARCHAR(100)
-  アドレス : VARCHAR(100)
+  user_name : VARCHAR(100)
+  mail_address : VARCHAR(100)
 }
 
-entity チャンネル {
-  +チャンネルid : INT [PK]
+entity channels {
+  +channel_id : INT [PK]
   --
-  チャンネル名 : VARCHAR(100)
-
+  channel_name : VARCHAR(100)
 }
-entity 番組 {
-  +番組id : INT [PK]
+entity programs {
+  +program_id : INT [PK]
   --
-  番組名 : VARCHAR(100)
-  時間 : INT
-  シーズン : VARCHAR(100)
-  エピソード : VARCHAR(100)
-  エピソードタイトル : VARCHAR(100)
-  エピソード詳細 : VARCHAR(100)
-  ジャンルid : [FK]
+  genre_id : [FK]
+  program_name : VARCHAR(100)
+  air_time : INT
+  season : INT
+  episode : INT
+  episode_title : VARCHAR(100)
+  episode_detail : VARCHAR(100)
 }
-entity ジャンル {
-  +ジャンルid : INT [PK]
+entity genres {
+  +genre_id : INT [PK]
   --
-  ジャンル名 : DATE
-}
-
-entity 番組枠 {
-  +番組枠id : INT [PK]
-  --
-  チャンネルid : INT[FK]
-  番組id : INT[FK]
-  開始時刻
-  終了時刻
-}
-entity 視聴履歴 {
-  +履歴id : INT [PK]
-  --
-  番組枠id : INT[FK]
-  ユーザid : INT[FK]
+  genre_name : VARCHAR(100)
 }
 
-チャンネル ||-u-o{ 番組枠
-番組 ||-r-o{ 番組枠
-番組 }o-d-|| ジャンル
-ユーザ||-u-o{ 視聴履歴
-番組枠||-r-o{ 視聴履歴
+entity slots {
+  +slot_id : INT [PK]
+  --
+  channel_id : INT[FK]
+  program_id : INT[FK]
+  start_time : DATETIME
+  end_time : DATETIME
+}
+entity histories {
+  +history_id : INT [PK]
+  --
+  slot_id : INT[FK]
+  user_id : INT[FK]
+}
+
+channels ||-u-o{ slots
+programs ||-r-o{ slots
+programs }o-d-|| genres
+users ||-u-o{ histories
+slots ||-r-o{ histories
 @enduml
