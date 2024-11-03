@@ -1,6 +1,12 @@
 ## データベースの学習（架空のインターネットTV）
 ### はじめに
-データベースの学習のために，架空のインターネットTVを仮定してデータベース設計を行った．
+　データベースの学習のために，架空のインターネットTVを仮定してデータベース設計を行った．仕様は次の通りである．
+- ドラマ1，ドラマ2，...など10個のチャンネルがある．
+- 各チャンネルの下では時間帯ごとに番組枠（現状では3時間ずつの枠）が1つ設計されており，番組が放映される．
+- ある番組が複数チャンネルの異なる番組枠で放映されることがある．
+- 番組の情報として，タイトル，番組詳細，ジャンルが画面上に表示される．
+- 各エピソードの情報として，シーズン数，エピソード数，タイトル，エピソード詳細，動画時間，公開日，視聴数が画面上に表示される．単発のエピソードの場合はシーズン数，エピソード数は表示されない．
+- ジャンルとしてアニメ，ドラマなど5つのジャンルがある．各番組は1つ以上のジャンルに属する．
 
 ### テーブル設計
 - テーブル：users（ユーザ）
@@ -35,6 +41,8 @@
 | air_time | int | | | | |
 | season | int | YES | | | |
 | episode | int | YES | | | |
+| release_date | date | | | | |
+| view | int | | | 0 | |
 | episode_title | varchar(100) | | | | |
 | episode_detail | varchar(100) | | | | |
 
@@ -70,66 +78,82 @@ USE internet_tv;
 2. テーブルの作成
 `queries/create_table.sql`を読み込む．
 ``` SQL
-source create_table.sql
+source ファイルのパス/create_table.sql;
 ```
 3. データの挿入
-以下の6つの`queries/〇〇.sql`を読み込む．
+以下の6つの`queries/〇〇.sql`を読み込む．以下の順番で行ってください（外部キー制約があるため，順番を間違えるとエラーになります）．
 - sample_channels.sql
 - sample_genres.sql
-- sample_histories.sql
+- sample_users.sql
 - sample_programs.sql
 - sample_slots.sql
-- sample_users.sql
+- sample_histories.sql
+
 ``` SQL
-source [ファイル名（パス名）]
+source ファイルのパス/ファイル名.sql;
+```
+
+エラーになった場合次のようにしてテーブルをリセットしてください．
+``` SQL
+-- テーブルのデータを消去
+DELETE FROM テーブル名;
+-- AUTO_INCREMENTをリセット
+ALTER TABLE テーブル名 AUTO_INCREMENT = 1;
 ```
 
 ### クエリの実行
 - 視聴数トップ3のエピソードタイトルと視聴数を取得する．
 ``` SQL
-SELECT 
-    programs.program_name AS 番組名,
-    programs.episode_title AS エピソードタイトル,
-    COUNT(*) AS 視聴数
-FROM 
-    histories
-INNER JOIN 
-    slots ON histories.slot_id = slots.slot_id
-INNER JOIN 
-    programs ON slots.program_id = programs.program_id
-GROUP BY 
-    programs.program_name,
-    programs.episode,
-    programs.episode_title
-HAVING 
-    COUNT(*) > 1
-ORDER BY 
-    視聴数 DESC
-LIMIT 3;
+WITH ranked_data AS (
+    SELECT 
+        programs.program_name AS `番組名`,
+        programs.episode_title AS `エピソードタイトル`,
+        COUNT(*) AS `視聴数`,
+        RANK() OVER (ORDER BY COUNT(*) DESC) AS `rank`
+    FROM 
+        histories
+    INNER JOIN 
+        slots ON histories.slot_id = slots.slot_id
+    INNER JOIN 
+        programs ON slots.program_id = programs.program_id
+    GROUP BY 
+        programs.program_name,
+        programs.episode_title
+    )
+SELECT
+    `番組名`,
+    `エピソードタイトル`,
+    `視聴数`
+FROM ranked_data
+WHERE `rank` <= 3;
 ```
 - 視聴数トップ3の番組タイトル，シーズン数，エピソード数，エピソードタイトル，視聴数を取得する．
 ``` SQL
-SELECT 
-    programs.program_name AS 番組名,
-    programs.episode AS エピソード,
-    programs.episode_title AS エピソードタイトル,
-    COUNT(*) AS 視聴数
-
-FROM 
-    histories
-INNER JOIN 
-    slots ON histories.slot_id = slots.slot_id
-INNER JOIN 
-    programs ON slots.program_id = programs.program_id
-GROUP BY 
-    programs.program_name,
-    programs.episode,
-    programs.episode_title
-HAVING 
-    COUNT(*) > 1
-ORDER BY 
-    視聴数 DESC
-LIMIT 3;  
+WITH ranked_data AS (
+    SELECT 
+        programs.program_name AS `番組名`,
+        programs.episode AS `エピソード`,
+        programs.episode_title AS `エピソードタイトル`,
+        COUNT(*) AS `視聴数`,
+        RANK() OVER (ORDER BY COUNT(*) DESC) AS `rank`
+    FROM 
+        histories
+    INNER JOIN 
+        slots ON histories.slot_id = slots.slot_id
+    INNER JOIN 
+        programs ON slots.program_id = programs.program_id
+    GROUP BY 
+        programs.program_name,
+        programs.episode_title,
+        programs.episode
+    )
+SELECT
+    `番組名`,
+    `エピソード`,
+    `エピソードタイトル`,
+    `視聴数`
+FROM ranked_data
+WHERE `rank` <= 3;
 ```
 - 本日放送される番組のチャンネル名，開始時刻，終了時刻，シーズン数，エピソード数，エピソードタイトル，エピソード詳細を取得する．
 （「本日」の部分がうまく動かない場合は，コメントアウトしてある時刻に変更してください．）
@@ -178,3 +202,9 @@ WHERE
 ORDER BY
     start_time; 
 ```
+
+### 課題
+現在できていない部分を以下に列挙する．
+- テーブル`program`にカラム`release_date`（公開日）と`view`（視聴数）があるが，具体的なデータをいれることができなかった（公開日はサンプルデータ作成後にカラムを追加したため．視聴数については，テーブル`histories`（視聴履歴）のデータを合計することで求めているため）．
+- サンプルデータでは2つ以上のジャンルに属する番組が存在せず，その取扱についても考えることができていない．
+- 番組ごとの放送時間は様々あるが，放送枠は3時間で固定されている．放送時間によって放送枠を調整することがまだできていない．

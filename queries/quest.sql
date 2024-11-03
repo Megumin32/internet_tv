@@ -1,46 +1,70 @@
+WITH ranked_data AS (
+    SELECT 
+        programs.program_name AS `番組名`,
+        programs.episode AS `エピソード`,
+        programs.episode_title AS `エピソードタイトル`,
+        RANK() OVER (ORDER BY COUNT(*) DESC) AS `rank`
+    FROM 
+        histories
+    INNER JOIN 
+        slots ON histories.slot_id = slots.slot_id
+    INNER JOIN 
+        programs ON slots.program_id = programs.program_id
+    GROUP BY 
+        programs.program_name,
+        programs.episode_title,
+        programs.episode
+    )
+SELECT
+    `番組名`,`エピソード`,`エピソードタイトル`
+FROM ranked_data
+WHERE `rank` <= 3;
+
 -- エピソード視聴数トップ3のエピソードタイトルと視聴数を取得
-SELECT 
-    programs.program_name AS 番組名,
-    programs.episode_title AS エピソードタイトル,
-    COUNT(*) AS 視聴数
-FROM 
-    histories
-INNER JOIN 
-    slots ON histories.slot_id = slots.slot_id
-INNER JOIN 
-    programs ON slots.program_id = programs.program_id
-GROUP BY 
-    programs.program_name,
-    programs.episode,
-    programs.episode_title
-HAVING 
-    COUNT(*) > 1
-ORDER BY 
-    視聴数 DESC
-LIMIT 3;
+WITH ranked_data AS (
+    SELECT 
+        programs.program_name AS `番組名`,
+        programs.episode_title AS `エピソードタイトル`,
+        COUNT(*) AS `視聴数`,
+        RANK() OVER (ORDER BY COUNT(*) DESC) AS `rank`
+    FROM 
+        histories
+    INNER JOIN 
+        slots ON histories.slot_id = slots.slot_id
+    INNER JOIN 
+        programs ON slots.program_id = programs.program_id
+    GROUP BY 
+        programs.program_name,
+        programs.episode_title
+    )
+SELECT
+    `番組名`,`エピソードタイトル`,`視聴数`
+FROM ranked_data
+WHERE `rank` <= 3;
 
 -- エピソード視聴数トップ3の番組タイトル、シーズン数、エピソード数、エピソードタイトル、視聴数を取得
-SELECT 
-    programs.program_name AS 番組名,
-    programs.episode AS エピソード,
-    programs.episode_title AS エピソードタイトル,
-    COUNT(*) AS 視聴数
-
-FROM 
-    histories
-INNER JOIN 
-    slots ON histories.slot_id = slots.slot_id
-INNER JOIN 
-    programs ON slots.program_id = programs.program_id
-GROUP BY 
-    programs.program_name,
-    programs.episode,
-    programs.episode_title
-HAVING 
-    COUNT(*) > 1
-ORDER BY 
-    視聴数 DESC
-LIMIT 3;    
+WITH ranked_data AS (
+    SELECT 
+        programs.program_name AS `番組名`,
+        programs.episode AS `エピソード`,
+        programs.episode_title AS `エピソードタイトル`,
+        COUNT(*) AS `視聴数`,
+        RANK() OVER (ORDER BY COUNT(*) DESC) AS `rank`
+    FROM 
+        histories
+    INNER JOIN 
+        slots ON histories.slot_id = slots.slot_id
+    INNER JOIN 
+        programs ON slots.program_id = programs.program_id
+    GROUP BY 
+        programs.program_name,
+        programs.episode_title,
+        programs.episode
+    )
+SELECT
+    `番組名`,`エピソード`,`エピソードタイトル`,`視聴数`
+FROM ranked_data
+WHERE `rank` <= 3;
 
 -- 本日放送される全ての番組に対して、チャンネル名、放送開始時刻(日付+時間)、放送終了時刻、
 -- シーズン数、エピソード数、エピソードタイトル、エピソード詳細を取得

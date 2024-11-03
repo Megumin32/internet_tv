@@ -22,6 +22,8 @@ CREATE TABLE programs (
   episode_title VARCHAR(100) NOT NULL,
   episode_detail VARCHAR(100) NOT NULL,
   genre_id INT,
+  release_date DATE,
+  view INT DEFAULT 0,
   PRIMARY KEY (program_id),
   FOREIGN KEY (genre_id) REFERENCES genres(genre_id) ON UPDATE CASCADE
 );
